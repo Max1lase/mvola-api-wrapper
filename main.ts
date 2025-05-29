@@ -69,7 +69,7 @@ async function initiateMvolaPayment(paymentData: MvolaPaymentRequest, accessToke
       "Version": "1.0",
       "X-CorrelationID": crypto.randomUUID(),
       "UserLanguage": "mg",
-      "UserAccountIdentifier": `msisdn;${paymentData.debitParty[0].value}`,
+      "UserAccountIdentifier": `msisdn;${paymentData.creditParty[0].value}`,
       "partnerName": "Test Partner",
       "Content-Type": "application/json",
       "X-Callback-URL": "",
