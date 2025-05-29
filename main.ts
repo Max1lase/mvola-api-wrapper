@@ -26,8 +26,9 @@ interface MvolaPaymentRequest {
   debitParty: { key: string; value: string }[];
   creditParty: { key: string; value: string }[];
   metadata: { key: string; value: string }[];
-  requestDate: string;
-  requestingOrganisationTransactionReference: string;
+  requestDate?: string;
+  requestingOrganisationTransactionReference?: string;
+  originalTransactionReference?: string;
 }
 
 // Fonction d'authentification MVola
@@ -67,10 +68,11 @@ async function initiateMvolaPayment(paymentData: MvolaPaymentRequest, accessToke
       "Authorization": `Bearer ${accessToken}`,
       "Version": "1.0",
       "X-CorrelationID": crypto.randomUUID(),
-      "UserLanguage": "FR",
-      "UserAccountIdentifier": `msisdn;${paymentData.creditParty[0].value}`,
+      "UserLanguage": "mg",
+      "UserAccountIdentifier": `msisdn;${paymentData.debitParty[0].value}`,
       "partnerName": "Test Partner",
       "Content-Type": "application/json",
+      "X-Callback-URL": "",
       "Cache-Control": "no-cache",
     };
 
@@ -174,10 +176,10 @@ export default {
           // Parse le body de la requête
           const paymentRequest = await request.json() as MvolaPaymentRequest;
           
-          // Ajouter la date si pas fournie
-          if (!paymentRequest.requestDate) {
-            paymentRequest.requestDate = new Date().toISOString();
-          }
+          // Forcer les valeurs exactes de la documentation MVola
+          paymentRequest.requestDate = "";
+          paymentRequest.requestingOrganisationTransactionReference = "";
+          paymentRequest.originalTransactionReference = "";
 
           const paymentResult = await initiateMvolaPayment(paymentRequest, auth.access_token);
           
