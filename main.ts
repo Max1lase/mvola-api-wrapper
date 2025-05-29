@@ -63,22 +63,35 @@ async function authenticateMvola(): Promise<MvolaAuthResponse | null> {
 // Fonction d'initiation de paiement
 async function initiateMvolaPayment(paymentData: MvolaPaymentRequest, accessToken: string) {
   try {
+    const headers = {
+      "Authorization": `Bearer ${accessToken}`,
+      "Version": "1.0",
+      "X-CorrelationID": crypto.randomUUID(),
+      "UserLanguage": "FR",
+      "UserAccountIdentifier": `msisdn;${paymentData.creditParty[0].value}`,
+      "partnerName": "Test Partner",
+      "Content-Type": "application/json",
+      "Cache-Control": "no-cache",
+    };
+
+    // Debug logs
+    console.log("=== MVola Payment Request ===");
+    console.log("URL:", `${MVOLA_CONFIG.BASE_URL}${MVOLA_CONFIG.MERCHANT_PAY_ENDPOINT}`);
+    console.log("Headers:", JSON.stringify(headers, null, 2));
+    console.log("Body:", JSON.stringify(paymentData, null, 2));
+
     const response = await fetch(`${MVOLA_CONFIG.BASE_URL}${MVOLA_CONFIG.MERCHANT_PAY_ENDPOINT}`, {
       method: "POST",
-      headers: {
-        "Authorization": `Bearer ${accessToken}`,
-        "Version": "1.0",
-        "X-CorrelationID": crypto.randomUUID(),
-        "UserLanguage": "FR",
-        "UserAccountIdentifier": `msisdn;${paymentData.creditParty[0].value}`,
-        "partnerName": "Test Partner",
-        "Content-Type": "application/json",
-        "Cache-Control": "no-cache",
-      },
+      headers,
       body: JSON.stringify(paymentData),
     });
 
     const result = await response.json();
+    
+    console.log("=== MVola Response ===");
+    console.log("Status:", response.status);
+    console.log("Response:", JSON.stringify(result, null, 2));
+
     return { status: response.status, data: result };
   } catch (error) {
     console.error("Payment initiation error:", error);
@@ -204,4 +217,4 @@ export default {
       });
     }
   }
-}; 
+};
